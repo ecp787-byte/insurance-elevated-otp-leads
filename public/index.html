@@ -255,6 +255,10 @@
             </div>
           </div>
           <div class="qty-leads" id="leads-standard">= 25 leads</div>
+          <div class="states-row">
+            <label>Target States <span class="min-note">(choose at least 10)</span></label>
+            <button type="button" class="states-select-btn" id="states-btn-standard" data-target="standard">Select States — 0 chosen</button>
+          </div>
           <div class="total-row">
             <span class="total-label">Total</span>
             <span class="total-val" id="total-standard">$1,250.00</span>
@@ -294,6 +298,10 @@
             </div>
           </div>
           <div class="qty-leads" id="leads-partner">= 25 leads</div>
+          <div class="states-row">
+            <label>Target States <span class="min-note">(choose at least 10)</span></label>
+            <button type="button" class="states-select-btn" id="states-btn-partner" data-target="partner">Select States — 0 chosen</button>
+          </div>
           <div class="total-row">
             <span class="total-label">Total</span>
             <span class="total-val" id="total-partner">$1,000.00</span>
@@ -310,6 +318,25 @@
     </div>
   </div>
 </section>
+
+<div class="states-modal-overlay" id="states-modal" hidden>
+  <div class="states-modal">
+    <div class="states-modal-head">
+      <h3>Select Target States</h3>
+      <button type="button" class="states-modal-close" id="states-modal-close" aria-label="Close">&times;</button>
+    </div>
+    <p class="states-modal-sub">Choose at least 10 states you want these leads from. <b><span id="states-count">0</span> selected</b>.</p>
+    <div class="states-modal-actions">
+      <button type="button" id="states-select-all" class="link-btn">Select All 51</button>
+      <button type="button" id="states-clear" class="link-btn">Clear</button>
+    </div>
+    <div class="states-grid" id="states-grid"></div>
+    <div class="states-modal-foot">
+      <div class="msg" id="msg-states"></div>
+      <button type="button" class="btn btn-black btn-full" id="states-confirm">Confirm Selection</button>
+    </div>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">

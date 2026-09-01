@@ -22,6 +22,8 @@
   .status-box .details { margin-top: 26px; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 18px 22px; text-align: left; font-size: 14px; color: var(--subtle); }
   .status-box .details div { display: flex; justify-content: space-between; padding: 4px 0; }
   .status-box .details b { color: #fff; }
+  .status-box .details .states-row { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 10px; margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.12); }
+  .status-box .details .states-row b { text-align: left; white-space: normal; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -35,6 +37,10 @@
       <div><span>Leads purchased</span><b id="d-leads">—</b></div>
       <div><span>Rate</span><b id="d-tier">—</b></div>
       <div><span>Total</span><b id="d-total">—</b></div>
+      <div class="states-row" id="d-states-row" style="display:none;">
+        <span>Target states (<span id="d-states-count">0</span>)</span>
+        <b id="d-states">—</b>
+      </div>
     </div>
     <div class="cta-row" style="justify-content:center; margin-top:30px;">
       <a href="/" class="btn btn-white">Back to Home</a>
@@ -55,6 +61,12 @@
           if (typeof data.amount_total === "number") {
             document.getElementById("d-total").textContent =
               "$" + (data.amount_total / 100).toLocaleString("en-US", { minimumFractionDigits: 2 });
+          }
+          if (data.metadata.states) {
+            const list = data.metadata.states.split(",").filter(Boolean);
+            document.getElementById("d-states-row").style.display = "flex";
+            document.getElementById("d-states-count").textContent = data.metadata.state_count || list.length;
+            document.getElementById("d-states").textContent = list.join(", ");
           }
         }
       })
