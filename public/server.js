@@ -26,7 +26,7 @@ const PRICING = {
 const VALID_STATES = new Set([
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID",
   "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO",
-  "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA",
+  "MT", "NE", "NV", "NH", "NJ", "NM", "NC", "ND", "OH", "OK", "OR", "PA",
   "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
 ]);
 
@@ -43,7 +43,7 @@ app.post("/api/verify-partner", (req, res) => {
     return res.status(503).json({
       ok: false,
       message:
-        "Partner checkout isn't set up yet. Contact eric@veritassolutions.io to get approved.",
+        "Partner checkout isn't set up yet. Contact info@veritassolutions.io to get approved.",
     });
   }
   if (typeof code === "string" && code.trim() === PARTNER_CODE) {
@@ -57,7 +57,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     if (!stripe) {
       return res.status(503).json({
         error:
-          "Checkout isn't live yet — the site's Stripe key hasn't been configured. Contact eric@veritassolutions.io.",
+          "Checkout isn't live yet — the site's Stripe key hasn't been configured. Contact info@veritassolutions.io.",
       });
     }
 
@@ -90,7 +90,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       if (!PARTNER_CODE) {
         return res.status(503).json({
           error:
-            "Partner checkout isn't set up yet. Contact eric@veritassolutions.io to get approved.",
+            "Partner checkout isn't set up yet. Contact info@veritassolutions.io to get approved.",
         });
       }
       if (typeof partnerCode !== "string" || partnerCode.trim() !== PARTNER_CODE) {
