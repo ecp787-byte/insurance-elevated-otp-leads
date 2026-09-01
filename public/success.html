@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Order Confirmed — Insurance Elevated</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css" />
+<style>
+  .status-page { min-height: 100vh; background: var(--black); color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; }
+  .status-box { max-width: 520px; }
+  .status-box img { height: 34px; margin-bottom: 30px; }
+  .status-box .check {
+    width: 64px; height: 64px; border-radius: 50%; background: #fff; color: #111;
+    display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700;
+    margin: 0 auto 24px;
+  }
+  .status-box h1 { color: #fff; font-size: 28px; }
+  .status-box p { color: var(--subtle); margin-top: 14px; font-size: 15px; }
+  .status-box .details { margin-top: 26px; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 18px 22px; text-align: left; font-size: 14px; color: var(--subtle); }
+  .status-box .details div { display: flex; justify-content: space-between; padding: 4px 0; }
+  .status-box .details b { color: #fff; }
+</style>
+</head>
+<body>
+<div class="status-page">
+  <div class="status-box">
+    <img src="/logo.png" alt="Insurance Elevated" />
+    <div class="check">✓</div>
+    <h1>Order Confirmed</h1>
+    <p>Thanks for your order. A receipt is on its way to your email, and your leads will be on their way shortly.</p>
+    <div class="details" id="details" style="display:none;">
+      <div><span>Leads purchased</span><b id="d-leads">—</b></div>
+      <div><span>Rate</span><b id="d-tier">—</b></div>
+      <div><span>Total</span><b id="d-total">—</b></div>
+    </div>
+    <div class="cta-row" style="justify-content:center; margin-top:30px;">
+      <a href="/" class="btn btn-white">Back to Home</a>
+    </div>
+  </div>
+</div>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
+  if (sessionId) {
+    fetch("/api/session/" + encodeURIComponent(sessionId))
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.metadata) {
+          document.getElementById("details").style.display = "block";
+          document.getElementById("d-leads").textContent = data.metadata.leads || "—";
+          document.getElementById("d-tier").textContent = data.metadata.tier || "—";
+          if (typeof data.amount_total === "number") {
+            document.getElementById("d-total").textContent =
+              "$" + (data.amount_total / 100).toLocaleString("en-US", { minimumFractionDigits: 2 });
+          }
+        }
+      })
+      .catch(() => {});
+  }
+</script>
+</body>
+</html>
