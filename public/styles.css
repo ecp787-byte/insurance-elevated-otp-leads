@@ -208,8 +208,7 @@ nav.nav-links a:hover { color: var(--black); }
 
 /* ---------- TRUST STRIP ---------- */
 .trust-strip {
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
+  background: var(--black);
   padding: 30px 0;
 }
 .trust-strip .wrap {
@@ -224,10 +223,10 @@ nav.nav-links a:hover { color: var(--black); }
   align-items: center;
   gap: 12px;
 }
-.trust-item .stars { color: var(--black); font-size: 16px; letter-spacing: 2px; }
-.trust-item .trust-text { font-size: 14px; font-weight: 700; color: var(--black); }
-.trust-item .trust-sub { font-size: 12.5px; color: var(--muted); font-weight: 500; }
-.trust-divider { width: 1px; height: 32px; background: var(--border); }
+.trust-item .stars { color: var(--white); font-size: 16px; letter-spacing: 2px; }
+.trust-item .trust-text { font-size: 14px; font-weight: 700; color: var(--white); }
+.trust-item .trust-sub { font-size: 12.5px; color: var(--subtle); font-weight: 500; }
+.trust-divider { width: 1px; height: 32px; background: rgba(255, 255, 255, 0.2); }
 @media (max-width: 700px) {
   .trust-strip .wrap { gap: 20px; }
   .trust-divider { display: none; }
