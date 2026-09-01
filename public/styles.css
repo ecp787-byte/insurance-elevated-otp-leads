@@ -232,6 +232,81 @@ nav.nav-links a:hover { color: var(--white); }
   .trust-divider { display: none; }
 }
 
+.press-row {
+  margin-top: 26px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.press-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+.press-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 36px;
+  row-gap: 16px;
+}
+.press {
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 0.9;
+  line-height: 1;
+  white-space: nowrap;
+}
+.press-forbes {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+.press-nasdaq {
+  font-family: "Inter", Arial, sans-serif;
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.press-entrepreneur {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 19px;
+  letter-spacing: 0.3px;
+}
+.press-maxim {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+.press-catalyst {
+  font-family: "Inter", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+.press-inc {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 21px;
+  letter-spacing: 0.3px;
+}
+@media (max-width: 700px) {
+  .press-logos { gap: 22px; }
+  .press { font-size: 16px !important; letter-spacing: 1px !important; }
+}
+
 /* ---------- SECTIONS ---------- */
 section { padding: 88px 0; }
 section.tight { padding: 64px 0; }
