@@ -251,12 +251,9 @@ section.tight { padding: 64px 0; }
   max-width: 1040px;
   margin: 0 auto;
 }
-.problem-list { display: flex; flex-direction: column; gap: 26px; }
-.problem-item { display: flex; gap: 14px; }
-.problem-item .dot {
-  width: 9px; height: 9px; border-radius: 50%; background: var(--black);
-  margin-top: 8px; flex-shrink: 0;
-}
+.problem-copy { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.problem-list { display: flex; flex-direction: column; gap: 22px; align-items: center; }
+.problem-item { max-width: 420px; }
 .problem-item h4 { font-size: 16px; font-weight: 700; color: var(--black); font-family: inherit; }
 .problem-item p { font-size: 14.5px; color: var(--text); margin-top: 4px; }
 .problem-card {
