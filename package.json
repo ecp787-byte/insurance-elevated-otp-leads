@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
+    "nodemailer": "^9.1.1",
     "stripe": "^16.9.0"
   }
 }
