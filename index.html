@@ -9,14 +9,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css" />
+<noscript><style>[data-reveal]{opacity:1!important;transform:none!important;}</style></noscript>
 </head>
 <body>
 
 <header class="site-nav">
   <div class="wrap">
     <div class="brand">
-      <img src="/logo-mark.png" alt="Insurance Elevated" />
-      <span class="brand-name">Insurance Elevated</span>
+      <img src="/logo.png" alt="Insurance Elevated" />
       <div class="brand-sub">A Veritas<br />Company</div>
     </div>
     <nav class="nav-links">
@@ -25,7 +25,7 @@
       <a href="#lead-data">Lead Data</a>
       <a href="#pricing">Pricing</a>
     </nav>
-    <a href="#pricing" class="btn btn-black btn-sm">Buy Leads</a>
+    <a href="#pricing" class="btn btn-white btn-sm">Buy Leads</a>
   </div>
 </header>
 
@@ -40,22 +40,22 @@
     </div>
     <div class="hero-stats">
       <div>
-        <div class="stat-num">100%</div>
+        <div class="stat-num" data-counter>100%</div>
         <div class="stat-label">OTP Phone-Verified</div>
       </div>
       <div>
-        <div class="stat-num">20%</div>
+        <div class="stat-num" data-counter>20%</div>
         <div class="stat-label">Avg. 30-Day Conversion</div>
       </div>
       <div>
-        <div class="stat-num">$1,750</div>
+        <div class="stat-num" data-counter>$1,750</div>
         <div class="stat-label">Avg. Target Premium</div>
       </div>
     </div>
   </div>
 </section>
 
-<div class="trust-strip">
+<div class="trust-strip" data-reveal>
   <div class="wrap">
     <div class="trust-item">
       <span class="stars">★★★★★</span>
@@ -63,12 +63,16 @@
         <div class="trust-text">Thousands of 5-Star Reviews</div>
       </div>
     </div>
-    <div class="trust-divider"></div>
-    <div class="trust-item">
-      <div>
-        <div class="trust-text">40,000+ Organic Followers</div>
-        <div class="trust-sub">A real, engaged audience — not paid traffic</div>
-      </div>
+  </div>
+  <div class="press-row">
+    <div class="press-label">Insurance Elevated Has Been Featured In</div>
+    <div class="press-logos">
+      <span class="press press-forbes">Forbes</span>
+      <span class="press press-nasdaq">Nasdaq</span>
+      <span class="press press-entrepreneur">Entrepreneur</span>
+      <span class="press press-maxim">MAXIM</span>
+      <span class="press press-catalyst">Catalyst</span>
+      <span class="press press-inc">Inc.</span>
     </div>
   </div>
 </div>
@@ -76,41 +80,29 @@
 <section>
   <div class="wrap">
     <div class="problem-grid">
-      <div>
+      <div class="problem-copy" data-reveal>
         <span class="kicker">The Problem</span>
         <h2 style="font-size:30px; margin-top:12px;">Most insurance leads are cold before you ever dial.</h2>
         <div class="problem-list" style="margin-top:32px;">
           <div class="problem-item">
-            <div class="dot"></div>
-            <div>
-              <h4>Recycled &amp; resold</h4>
-              <p>The same contact gets sold to multiple agents, so you're competing before you even call.</p>
-            </div>
+            <h4>Recycled &amp; resold</h4>
+            <p>The same contact gets sold to multiple agents, so you're competing before you even call.</p>
           </div>
           <div class="problem-item">
-            <div class="dot"></div>
-            <div>
-              <h4>Unverified contact info</h4>
-              <p>Fake or mistyped phone numbers mean wasted dials and dead data.</p>
-            </div>
+            <h4>Unverified contact info</h4>
+            <p>Fake or mistyped phone numbers mean wasted dials and dead data.</p>
           </div>
           <div class="problem-item">
-            <div class="dot"></div>
-            <div>
-              <h4>No proof of real intent</h4>
-              <p>A form-fill with no verification step is easy to fake and easy to abandon.</p>
-            </div>
+            <h4>No proof of real intent</h4>
+            <p>A form-fill with no verification step is easy to fake and easy to abandon.</p>
           </div>
           <div class="problem-item">
-            <div class="dot"></div>
-            <div>
-              <h4>Wasted ad spend</h4>
-              <p>Every unqualified lead is lead budget that didn't produce a conversation.</p>
-            </div>
+            <h4>Wasted ad spend</h4>
+            <p>Every unqualified lead is lead budget that didn't produce a conversation.</p>
           </div>
         </div>
       </div>
-      <div class="problem-card">
+      <div class="problem-card" data-reveal>
         <div class="icon-circle"><img src="/icon-mobile.png" alt="" /></div>
         <h3>Unverified leads waste your time and budget</h3>
         <p>Every dial into a bad lead is a dial you didn't make into a real prospect. OTP Leads fix that at the source.</p>
@@ -121,25 +113,25 @@
 
 <section id="how-it-works" class="section-dark">
   <div class="wrap">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <span class="kicker on-dark">The Solution</span>
       <h2>Introducing OTP Leads</h2>
       <p>Every lead completes a guided quote experience and verifies a live phone number by one-time passcode — before you ever pay for it.</p>
     </div>
     <div class="steps-grid">
-      <div class="step-card">
+      <div class="step-card" data-reveal>
         <div class="step-num">01</div>
         <div class="icon-circle on-dark" style="margin-top:20px;"><img src="/icon-chart.png" alt="" /></div>
         <h3>Guided Quote</h3>
         <p>Prospect actively selects coverage goals, policy type, and coverage amount.</p>
       </div>
-      <div class="step-card">
+      <div class="step-card" data-reveal>
         <div class="step-num">02</div>
         <div class="icon-circle on-dark" style="margin-top:20px;"><img src="/icon-usercheck.png" alt="" /></div>
         <h3>Real Intent Signals</h3>
         <p>Health basics and preferences are captured through a multi-step flow — not a single click.</p>
       </div>
-      <div class="step-card">
+      <div class="step-card" data-reveal>
         <div class="step-num">03</div>
         <div class="icon-circle on-dark" style="margin-top:20px;"><img src="/icon-mobile.png" alt="" /></div>
         <h3>Live OTP Verification</h3>
@@ -151,27 +143,35 @@
 
 <section id="funnel" class="section-alt">
   <div class="wrap">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <span class="kicker">The Experience</span>
       <h2>Inside the Funnel</h2>
       <p>A real, guided quote flow — not a static form fill.</p>
     </div>
     <div class="screens-grid">
-      <div class="screen-card">
-        <img src="/screen-1-goals.png" alt="Coverage goals selection screen" />
-        <div class="cap">1. Coverage Goals</div>
+      <div class="screen-card" data-reveal>
+        <img src="/screen-1-goal.png" alt="Coverage goal selection screen" />
+        <div class="cap">1. Coverage Goal</div>
       </div>
-      <div class="screen-card">
-        <img src="/screen-2-type.png" alt="Policy type selection screen" />
-        <div class="cap">2. Policy Type Selection (IUL)</div>
+      <div class="screen-card" data-reveal>
+        <img src="/screen-2-beneficiary.png" alt="Beneficiary selection screen" />
+        <div class="cap">2. Beneficiary</div>
       </div>
-      <div class="screen-card">
-        <img src="/screen-3-amount.png" alt="Coverage amount screen" />
-        <div class="cap">3. Coverage Amount</div>
+      <div class="screen-card" data-reveal>
+        <img src="/screen-3-budget.png" alt="Monthly budget selection screen" />
+        <div class="cap">3. Monthly Budget</div>
       </div>
-      <div class="screen-card">
-        <img src="/screen-4-otp.png" alt="OTP phone verification screen" />
-        <div class="cap">4. Live OTP Phone Verification</div>
+      <div class="screen-card" data-reveal>
+        <img src="/screen-4-health.png" alt="Pre-existing conditions screen" />
+        <div class="cap">4. Health Profile</div>
+      </div>
+      <div class="screen-card" data-reveal>
+        <img src="/screen-5-contact.png" alt="Contact information screen" />
+        <div class="cap">5. Contact Information</div>
+      </div>
+      <div class="screen-card" data-reveal>
+        <img src="/screen-6-otp.png" alt="OTP phone verification screen" />
+        <div class="cap">6. Live OTP Phone Verification</div>
       </div>
     </div>
   </div>
@@ -179,13 +179,13 @@
 
 <section id="lead-data">
   <div class="wrap">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <span class="kicker">What You Get</span>
       <h2>What Every Lead Comes With</h2>
       <p>A sample delivered lead — the same structured data behind every purchase.</p>
     </div>
     <div class="lead-grid">
-      <div class="lead-card">
+      <div class="lead-card" data-reveal>
         <div class="lead-head">
           <div class="icon-circle" style="width:42px;height:42px;"><img src="/icon-chart.png" alt="" style="width:20px;height:20px;" /></div>
           <h4>Primary Goal</h4>
@@ -195,7 +195,7 @@
         <div class="lead-row"><span class="glyph"></span><span class="label">Protect Assets</span></div>
         <div class="lead-row"><span class="glyph"></span><span class="label">Protect Loved Ones</span></div>
       </div>
-      <div class="lead-card">
+      <div class="lead-card" data-reveal>
         <div class="lead-head">
           <div class="icon-circle" style="width:42px;height:42px;"><img src="/icon-users.png" alt="" style="width:20px;height:20px;" /></div>
           <h4>Beneficiary</h4>
@@ -205,7 +205,7 @@
         <div class="lead-row"><span class="glyph"></span><span class="label">More Than One</span></div>
         <div class="lead-row checked"><span class="glyph">✓</span><span class="label">Other: Sister</span></div>
       </div>
-      <div class="lead-card">
+      <div class="lead-card" data-reveal>
         <div class="lead-head">
           <div class="icon-circle" style="width:42px;height:42px;"><img src="/icon-heartbeat.png" alt="" style="width:20px;height:20px;" /></div>
           <h4>Health Profile</h4>
@@ -216,7 +216,7 @@
         <div class="lead-row checked"><span class="glyph">✓</span><span class="label">No Known Conditions</span></div>
       </div>
     </div>
-    <div class="lead-stats">
+    <div class="lead-stats" data-reveal>
       <div class="lead-stat">
         <div class="lead-stat-label">Date of Birth</div>
         <div class="lead-stat-val">06 / 18 / 1987</div>
@@ -235,7 +235,7 @@
 
 <section id="pricing" class="section-alt">
   <div class="wrap">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <span class="kicker">Pricing</span>
       <h2>Simple, Transparent Pricing</h2>
       <p>All leads are OTP phone-verified and sold in packs of 25.</p>
@@ -243,7 +243,7 @@
 
     <div class="pricing-grid">
       <!-- Standard -->
-      <div class="price-card standard">
+      <div class="price-card standard" data-reveal>
         <span class="price-tag">Standard</span>
         <div class="price-amount">$50</div>
         <div class="price-per">per lead</div>
@@ -264,6 +264,10 @@
             </div>
           </div>
           <div class="qty-leads" id="leads-standard">= 25 leads</div>
+          <div class="states-row">
+            <label>Target States <span class="min-note">(choose at least 10)</span></label>
+            <button type="button" class="states-select-btn" id="states-btn-standard" data-target="standard">Select States — 0 chosen</button>
+          </div>
           <div class="total-row">
             <span class="total-label">Total</span>
             <span class="total-val" id="total-standard">$1,250.00</span>
@@ -274,7 +278,7 @@
       </div>
 
       <!-- Partner -->
-      <div class="price-card partner">
+      <div class="price-card partner" data-reveal>
         <span class="price-tag">Partner Rate</span>
         <div class="price-amount">$40</div>
         <div class="price-per">per lead</div>
@@ -303,6 +307,10 @@
             </div>
           </div>
           <div class="qty-leads" id="leads-partner">= 25 leads</div>
+          <div class="states-row">
+            <label>Target States <span class="min-note">(choose at least 10)</span></label>
+            <button type="button" class="states-select-btn" id="states-btn-partner" data-target="partner">Select States — 0 chosen</button>
+          </div>
           <div class="total-row">
             <span class="total-label">Total</span>
             <span class="total-val" id="total-partner">$1,000.00</span>
@@ -315,10 +323,29 @@
 
     <div class="contact-strip">
       <p>Not a partner yet? <b>Ask about partner qualification and volume pricing for larger orders.</b></p>
-      <a href="mailto:eric@veritassolutions.io" class="btn btn-outline btn-sm">Contact Us</a>
+      <a href="mailto:info@veritassolutions.io" class="btn btn-outline btn-sm">Contact Us</a>
     </div>
   </div>
 </section>
+
+<div class="states-modal-overlay" id="states-modal" hidden>
+  <div class="states-modal">
+    <div class="states-modal-head">
+      <h3>Select Target States</h3>
+      <button type="button" class="states-modal-close" id="states-modal-close" aria-label="Close">&times;</button>
+    </div>
+    <p class="states-modal-sub">Choose at least 10 states you want these leads from. <b><span id="states-count">0</span> selected</b>.</p>
+    <div class="states-modal-actions">
+      <button type="button" id="states-select-all" class="link-btn">Select All 50</button>
+      <button type="button" id="states-clear" class="link-btn">Clear</button>
+    </div>
+    <div class="states-grid" id="states-grid"></div>
+    <div class="states-modal-foot">
+      <div class="msg" id="msg-states"></div>
+      <button type="button" class="btn btn-black btn-full" id="states-confirm">Confirm Selection</button>
+    </div>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">
@@ -327,7 +354,7 @@
         <img src="/logo.png" alt="Insurance Elevated" />
       </div>
       <div class="foot-contact">
-        <a href="mailto:eric@veritassolutions.io">eric@veritassolutions.io</a>
+        <a href="mailto:info@veritassolutions.io">info@veritassolutions.io</a>
       </div>
     </div>
     <div class="foot-bottom">Insurance Elevated, a Veritas Company — IUL OTP Leads</div>
