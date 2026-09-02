@@ -11,7 +11,7 @@
     ["MD", "Maryland"], ["MA", "Massachusetts"], ["MI", "Michigan"], ["MN", "Minnesota"],
     ["MS", "Mississippi"], ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"],
     ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"], ["NM", "New Mexico"],
-    ["NY", "New York"], ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"],
+    ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"],
     ["OK", "Oklahoma"], ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"],
     ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"], ["TX", "Texas"],
     ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"],
@@ -210,4 +210,72 @@
       btn.textContent = "Unlock Partner Pricing";
     }
   });
+
+  // ---------- Scroll-reveal + counters ----------
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const revealEls = Array.from(document.querySelectorAll("[data-reveal]"));
+  revealEls.forEach((el) => {
+    const siblings = Array.from(el.parentElement.children).filter((c) => c.hasAttribute("data-reveal"));
+    const idx = siblings.indexOf(el);
+    el.style.setProperty("--reveal-delay", Math.min(idx * 0.09, 0.45) + "s");
+  });
+
+  if (prefersReducedMotion) {
+    revealEls.forEach((el) => el.classList.add("is-visible"));
+  } else if ("IntersectionObserver" in window && revealEls.length) {
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    revealEls.forEach((el) => revealObserver.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add("is-visible"));
+  }
+
+  function animateCounter(el) {
+    const raw = el.textContent.trim();
+    const match = raw.match(/^([^\d]*)([\d,]+)([^\d]*)$/);
+    if (!match) return;
+    const [, prefix, numStr, suffix] = match;
+    const target = parseInt(numStr.replace(/,/g, ""), 10);
+    if (Number.isNaN(target)) return;
+    const duration = 1100;
+    const startTime = performance.now();
+    function tick(now) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(target * eased);
+      el.textContent = prefix + current.toLocaleString("en-US") + suffix;
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        el.textContent = raw;
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const counterEls = Array.from(document.querySelectorAll("[data-counter]"));
+  if (!prefersReducedMotion && "IntersectionObserver" in window && counterEls.length) {
+    const counterObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateCounter(entry.target);
+            counterObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    counterEls.forEach((el) => counterObserver.observe(el));
+  }
 })();
