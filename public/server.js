@@ -1,16 +1,105 @@
 const express = require("express");
 const path = require("path");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || "";
 const PARTNER_CODE = process.env.PARTNER_CODE || "";
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 let stripe = null;
 if (STRIPE_SECRET_KEY) {
   stripe = require("stripe")(STRIPE_SECRET_KEY);
 }
+
+// ---------- Purchase notification email ----------
+const SMTP_HOST = process.env.SMTP_HOST || "";
+const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+const SMTP_SECURE = process.env.SMTP_SECURE === "true"; // true for port 465, false for 587/25
+const SMTP_USER = process.env.SMTP_USER || "";
+const SMTP_PASS = process.env.SMTP_PASS || "";
+const EMAIL_FROM = process.env.EMAIL_FROM || `Insurance Elevated <${SMTP_USER}>`;
+const NOTIFY_TO = "info@veritassolutions.io";
+const NOTIFY_BCC = "eric@veritassolutions.io";
+
+let mailer = null;
+if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+  mailer = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  });
+}
+
+function fmtAmount(cents) {
+  if (cents == null) return "Unknown";
+  return "$" + (cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+async function sendPurchaseNotification(session) {
+  if (!mailer) {
+    console.warn("Purchase notification not sent — SMTP isn't configured yet.");
+    return;
+  }
+  const md = session.metadata || {};
+  const amount = fmtAmount(session.amount_total);
+  const buyerEmail = session.customer_details ? session.customer_details.email : "Not provided";
+  const statesList = md.states ? md.states.split(",").join(", ") : "Not provided";
+
+  const html = `
+    <h2>New IUL OTP Leads Purchase</h2>
+    <p><strong>Amount:</strong> ${amount}</p>
+    <p><strong>Tier:</strong> ${md.tier || "Unknown"}</p>
+    <p><strong>Packs:</strong> ${md.packs || "Unknown"}</p>
+    <p><strong>Leads:</strong> ${md.leads || "Unknown"}</p>
+    <p><strong>Target States (${md.state_count || "?"}):</strong> ${statesList}</p>
+    <p><strong>Buyer Email:</strong> ${buyerEmail}</p>
+    <p><strong>Stripe Session ID:</strong> ${session.id}</p>
+  `;
+
+  try {
+    await mailer.sendMail({
+      from: EMAIL_FROM,
+      to: NOTIFY_TO,
+      bcc: NOTIFY_BCC,
+      subject: `New Lead Purchase — ${amount} (${md.leads || "?"} leads)`,
+      html,
+    });
+    console.log("Purchase notification email sent for session", session.id);
+  } catch (err) {
+    console.error("Failed to send purchase notification email:", err);
+  }
+}
+
+// Stripe webhook needs the raw request body for signature verification, so this
+// route is registered BEFORE the global express.json() middleware below.
+app.post("/api/stripe-webhook", express.raw({ type: "application/json" }), async (req, res) => {
+  if (!stripe || !STRIPE_WEBHOOK_SECRET) {
+    console.warn("Stripe webhook received but webhook isn't configured.");
+    return res.status(503).send("Webhook not configured.");
+  }
+
+  let event;
+  try {
+    const sig = req.headers["stripe-signature"];
+    event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    sendPurchaseNotification(session).catch((err) =>
+      console.error("Unhandled error sending purchase notification:", err)
+    );
+  }
+
+  res.json({ received: true });
+});
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -34,6 +123,8 @@ app.get("/api/status", (req, res) => {
   res.json({
     stripeConfigured: Boolean(stripe),
     partnerProgramConfigured: Boolean(PARTNER_CODE),
+    webhookConfigured: Boolean(stripe && STRIPE_WEBHOOK_SECRET),
+    emailConfigured: Boolean(mailer),
   });
 });
 
