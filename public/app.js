@@ -1,7 +1,8 @@
 (function () {
   const LEADS_PER_PACK = 25;
   const MIN_STATES = 10;
-  const RATES = { standard: 50, partner: 40 };
+  const RATES = { standard: 50, preferred: 45, partner: 40 };
+  const CODE_TIERS = ["preferred", "partner"]; // tiers that require an access code
   const STATES = [
     ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"],
     ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"],
@@ -20,9 +21,10 @@
 
   const state = {
     standard: 1,
+    preferred: 1,
     partner: 1,
-    partnerCode: null,
-    selectedStates: { standard: new Set(), partner: new Set() },
+    codes: { preferred: null, partner: null },
+    selectedStates: { standard: new Set(), preferred: new Set(), partner: new Set() },
   };
 
   let modalTarget = null;
@@ -36,7 +38,8 @@
     const packs = state[tier];
     document.getElementById(`qty-${tier}`).value = packs;
     document.getElementById(`leads-${tier}`).textContent = `= ${packs * LEADS_PER_PACK} leads`;
-    document.getElementById(`total-${tier}`).textContent = fmt(packs * LEADS_PER_PACK * RATES[tier]);
+    document.getElementById(`total-${tier}`).textContent =
+      fmt(packs * LEADS_PER_PACK * RATES[tier]) + " / week";
   }
 
   function renderStatesButton(tier) {
@@ -57,8 +60,10 @@
   });
 
   renderTier("standard");
+  renderTier("preferred");
   renderTier("partner");
   renderStatesButton("standard");
+  renderStatesButton("preferred");
   renderStatesButton("partner");
 
   function setMsg(id, text, kind) {
@@ -137,7 +142,7 @@
 
   // ---------- Checkout ----------
   async function startCheckout(tier, button) {
-    const msgId = tier === "standard" ? "msg-standard" : "msg-partner";
+    const msgId = `msg-${tier}`;
     const chosen = state.selectedStates[tier];
     if (chosen.size < MIN_STATES) {
       setMsg(msgId, `Select at least ${MIN_STATES} target states before checking out.`, "err");
@@ -151,7 +156,7 @@
     setMsg(msgId, "", "");
     try {
       const body = { tier, packs: state[tier], states: Array.from(chosen) };
-      if (tier === "partner") body.partnerCode = state.partnerCode;
+      if (CODE_TIERS.includes(tier)) body.code = state.codes[tier];
       const res = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -175,41 +180,53 @@
   document.getElementById("buy-standard").addEventListener("click", (e) => {
     startCheckout("standard", e.currentTarget);
   });
+  document.getElementById("buy-preferred").addEventListener("click", (e) => {
+    startCheckout("preferred", e.currentTarget);
+  });
   document.getElementById("buy-partner").addEventListener("click", (e) => {
     startCheckout("partner", e.currentTarget);
   });
 
-  document.getElementById("unlock-partner").addEventListener("click", async (e) => {
-    const btn = e.currentTarget;
-    const code = document.getElementById("partner-code").value.trim();
-    if (!code) {
-      setMsg("msg-partner-gate", "Enter your partner code.", "err");
-      return;
-    }
-    btn.disabled = true;
-    btn.textContent = "Checking…";
-    try {
-      const res = await fetch("/api/verify-partner", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        state.partnerCode = code;
-        document.getElementById("partner-locked").style.display = "none";
-        document.getElementById("partner-unlocked").style.display = "block";
-      } else {
-        setMsg("msg-partner-gate", data.message || "Invalid code.", "err");
-        btn.disabled = false;
-        btn.textContent = "Unlock Partner Pricing";
+  // ---------- Code-gated tiers (Preferred, Partner) ----------
+  function setUpCodeGate(tier, unlockLabel) {
+    const unlockBtn = document.getElementById(`unlock-${tier}`);
+    if (!unlockBtn) return;
+    unlockBtn.addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      const code = document.getElementById(`${tier}-code`).value.trim();
+      const gateMsgId = `msg-${tier}-gate`;
+      if (!code) {
+        setMsg(gateMsgId, `Enter your ${tier} code.`, "err");
+        return;
       }
-    } catch (err) {
-      setMsg("msg-partner-gate", "Network error — please try again.", "err");
-      btn.disabled = false;
-      btn.textContent = "Unlock Partner Pricing";
-    }
-  });
+      btn.disabled = true;
+      btn.textContent = "Checking…";
+      try {
+        const res = await fetch("/api/verify-partner", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, tier }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          state.codes[tier] = code;
+          document.getElementById(`${tier}-locked`).style.display = "none";
+          document.getElementById(`${tier}-unlocked`).style.display = "block";
+        } else {
+          setMsg(gateMsgId, data.message || "Invalid code.", "err");
+          btn.disabled = false;
+          btn.textContent = unlockLabel;
+        }
+      } catch (err) {
+        setMsg(gateMsgId, "Network error — please try again.", "err");
+        btn.disabled = false;
+        btn.textContent = unlockLabel;
+      }
+    });
+  }
+
+  setUpCodeGate("preferred", "Unlock Preferred Pricing");
+  setUpCodeGate("partner", "Unlock Partner Pricing");
 
   // ---------- Scroll-reveal + counters ----------
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Order Confirmed — Insurance Elevated</title>
+<title>Subscription Confirmed — Insurance Elevated</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -31,12 +31,12 @@
   <div class="status-box">
     <img src="/logo.png" alt="Insurance Elevated" />
     <div class="check">✓</div>
-    <h1>Order Confirmed</h1>
-    <p>Thanks for your order. A receipt is on its way to your email, and your leads will be on their way shortly.</p>
+    <h1>Subscription Confirmed</h1>
+    <p>Thanks for subscribing. A receipt is on its way to your email, your leads will be on their way shortly, and you'll be billed automatically every week until you cancel.</p>
     <div class="details" id="details" style="display:none;">
-      <div><span>Leads purchased</span><b id="d-leads">—</b></div>
+      <div><span>Leads per week</span><b id="d-leads">—</b></div>
       <div><span>Rate</span><b id="d-tier">—</b></div>
-      <div><span>Total</span><b id="d-total">—</b></div>
+      <div><span>Billed weekly</span><b id="d-total">—</b></div>
       <div class="states-row" id="d-states-row" style="display:none;">
         <span>Target states (<span id="d-states-count">0</span>)</span>
         <b id="d-states">—</b>
@@ -60,7 +60,7 @@
           document.getElementById("d-tier").textContent = data.metadata.tier || "—";
           if (typeof data.amount_total === "number") {
             document.getElementById("d-total").textContent =
-              "$" + (data.amount_total / 100).toLocaleString("en-US", { minimumFractionDigits: 2 });
+              "$" + (data.amount_total / 100).toLocaleString("en-US", { minimumFractionDigits: 2 }) + " / week";
           }
           if (data.metadata.states) {
             const list = data.metadata.states.split(",").filter(Boolean);
