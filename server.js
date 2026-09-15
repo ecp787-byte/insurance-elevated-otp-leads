@@ -7,7 +7,9 @@ const PORT = process.env.PORT || 3000;
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || "";
 const PARTNER_CODE = process.env.PARTNER_CODE || "";
+const PREFERRED_CODE = process.env.PREFERRED_CODE || "";
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
+const TIER_CODES = { partner: PARTNER_CODE, preferred: PREFERRED_CODE };
 
 let stripe = null;
 if (STRIPE_SECRET_KEY) {
@@ -39,25 +41,26 @@ function fmtAmount(cents) {
   return "$" + (cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-async function sendPurchaseNotification(session) {
+// kind: "new" for the first signup, "renewal" for each weekly recurring charge.
+async function sendPurchaseNotification({ kind, amountCents, metadata, buyerEmail, refId }) {
   if (!mailer) {
     console.warn("Purchase notification not sent — SMTP isn't configured yet.");
     return;
   }
-  const md = session.metadata || {};
-  const amount = fmtAmount(session.amount_total);
-  const buyerEmail = session.customer_details ? session.customer_details.email : "Not provided";
+  const md = metadata || {};
+  const amount = fmtAmount(amountCents);
   const statesList = md.states ? md.states.split(",").join(", ") : "Not provided";
+  const heading = kind === "renewal" ? "Weekly Subscription Renewal" : "New IUL OTP Leads Subscription";
 
   const html = `
-    <h2>New IUL OTP Leads Purchase</h2>
-    <p><strong>Amount:</strong> ${amount}</p>
+    <h2>${heading}</h2>
+    <p><strong>Amount charged this cycle:</strong> ${amount}</p>
     <p><strong>Tier:</strong> ${md.tier || "Unknown"}</p>
     <p><strong>Packs:</strong> ${md.packs || "Unknown"}</p>
     <p><strong>Leads:</strong> ${md.leads || "Unknown"}</p>
     <p><strong>Target States (${md.state_count || "?"}):</strong> ${statesList}</p>
-    <p><strong>Buyer Email:</strong> ${buyerEmail}</p>
-    <p><strong>Stripe Session ID:</strong> ${session.id}</p>
+    <p><strong>Buyer Email:</strong> ${buyerEmail || "Not provided"}</p>
+    <p><strong>Stripe Reference:</strong> ${refId}</p>
   `;
 
   try {
@@ -65,10 +68,10 @@ async function sendPurchaseNotification(session) {
       from: EMAIL_FROM,
       to: NOTIFY_TO,
       bcc: NOTIFY_BCC,
-      subject: `New Lead Purchase — ${amount} (${md.leads || "?"} leads)`,
+      subject: `${kind === "renewal" ? "Weekly Renewal" : "New Subscription"} — ${amount} (${md.leads || "?"} leads)`,
       html,
     });
-    console.log("Purchase notification email sent for session", session.id);
+    console.log(`Purchase notification (${kind}) email sent for`, refId);
   } catch (err) {
     console.error("Failed to send purchase notification email:", err);
   }
@@ -92,10 +95,38 @@ app.post("/api/stripe-webhook", express.raw({ type: "application/json" }), async
   }
 
   if (event.type === "checkout.session.completed") {
+    // Fires once, when the subscription is first created.
     const session = event.data.object;
-    sendPurchaseNotification(session).catch((err) =>
-      console.error("Unhandled error sending purchase notification:", err)
-    );
+    sendPurchaseNotification({
+      kind: "new",
+      amountCents: session.amount_total,
+      metadata: session.metadata,
+      buyerEmail: session.customer_details ? session.customer_details.email : null,
+      refId: session.id,
+    }).catch((err) => console.error("Unhandled error sending purchase notification:", err));
+  }
+
+  if (event.type === "invoice.paid") {
+    // Fires on every successful charge, including the very first one — only
+    // notify here for actual renewals so the "new subscription" email above
+    // doesn't get duplicated for the initial invoice.
+    const invoice = event.data.object;
+    if (invoice.billing_reason === "subscription_cycle" && invoice.subscription) {
+      (async () => {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+          await sendPurchaseNotification({
+            kind: "renewal",
+            amountCents: invoice.amount_paid,
+            metadata: subscription.metadata,
+            buyerEmail: invoice.customer_email,
+            refId: invoice.id,
+          });
+        } catch (err) {
+          console.error("Unhandled error sending renewal notification:", err);
+        }
+      })();
+    }
   }
 
   res.json({ received: true });
@@ -104,12 +135,14 @@ app.post("/api/stripe-webhook", express.raw({ type: "application/json" }), async
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Pricing, in cents per lead. A "pack" is 25 leads.
+// Pricing, in cents per lead, billed weekly on an ongoing subscription until canceled.
+// A "pack" is 25 leads — the pack size sets how many leads each weekly charge covers.
 const LEADS_PER_PACK = 25;
 const MIN_STATES = 10;
 const PRICING = {
-  standard: { unitAmount: 5000, label: "Standard" }, // $50.00/lead
-  partner: { unitAmount: 4000, label: "Partner" }, // $40.00/lead
+  standard: { unitAmount: 5000, label: "Standard" }, // $50.00/lead/week
+  preferred: { unitAmount: 4500, label: "Preferred" }, // $45.00/lead/week
+  partner: { unitAmount: 4000, label: "Partner" }, // $40.00/lead/week
 };
 
 const VALID_STATES = new Set([
@@ -123,24 +156,31 @@ app.get("/api/status", (req, res) => {
   res.json({
     stripeConfigured: Boolean(stripe),
     partnerProgramConfigured: Boolean(PARTNER_CODE),
+    preferredProgramConfigured: Boolean(PREFERRED_CODE),
     webhookConfigured: Boolean(stripe && STRIPE_WEBHOOK_SECRET),
     emailConfigured: Boolean(mailer),
   });
 });
 
+// Shared code-gate for any tier that needs one (currently "preferred" and "partner").
+// Accepts either {code, tier} (new) or {code} alone, which defaults to "partner" for
+// backward compatibility with the original single-tier partner gate.
 app.post("/api/verify-partner", (req, res) => {
-  const { code } = req.body || {};
-  if (!PARTNER_CODE) {
+  const { code, tier } = req.body || {};
+  const targetTier = tier === "preferred" ? "preferred" : "partner";
+  const expectedCode = TIER_CODES[targetTier];
+  const label = targetTier === "preferred" ? "Preferred" : "Partner";
+
+  if (!expectedCode) {
     return res.status(503).json({
       ok: false,
-      message:
-        "Partner checkout isn't set up yet. Contact info@veritassolutions.io to get approved.",
+      message: `${label} checkout isn't set up yet. Contact info@veritassolutions.io to get approved.`,
     });
   }
-  if (typeof code === "string" && code.trim() === PARTNER_CODE) {
+  if (typeof code === "string" && code.trim() === expectedCode) {
     return res.json({ ok: true });
   }
-  return res.status(403).json({ ok: false, message: "That partner code isn't valid." });
+  return res.status(403).json({ ok: false, message: `That ${label.toLowerCase()} code isn't valid.` });
 });
 
 app.post("/api/create-checkout-session", async (req, res) => {
@@ -152,7 +192,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       });
     }
 
-    const { tier, packs, partnerCode, states } = req.body || {};
+    const { tier, packs, partnerCode, code, states } = req.body || {};
     const tierConfig = PRICING[tier];
     if (!tierConfig) {
       return res.status(400).json({ error: "Unknown pricing tier." });
@@ -177,15 +217,17 @@ app.post("/api/create-checkout-session", async (req, res) => {
       });
     }
 
-    if (tier === "partner") {
-      if (!PARTNER_CODE) {
+    if (tier === "partner" || tier === "preferred") {
+      const expectedCode = TIER_CODES[tier];
+      const suppliedCode = typeof code === "string" ? code : partnerCode; // partnerCode kept for older clients
+      const label = tier === "preferred" ? "Preferred" : "Partner";
+      if (!expectedCode) {
         return res.status(503).json({
-          error:
-            "Partner checkout isn't set up yet. Contact info@veritassolutions.io to get approved.",
+          error: `${label} checkout isn't set up yet. Contact info@veritassolutions.io to get approved.`,
         });
       }
-      if (typeof partnerCode !== "string" || partnerCode.trim() !== PARTNER_CODE) {
-        return res.status(403).json({ error: "That partner code isn't valid." });
+      if (typeof suppliedCode !== "string" || suppliedCode.trim() !== expectedCode) {
+        return res.status(403).json({ error: `That ${label.toLowerCase()} code isn't valid.` });
       }
     }
 
@@ -194,18 +236,27 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const statesLabel = stateCodes.join(", ");
     const statesForMeta = stateCodes.join(",").slice(0, 490); // Stripe metadata values cap at 500 chars
 
+    const orderMetadata = {
+      tier,
+      packs: String(packCount),
+      leads: String(leadCount),
+      state_count: String(stateCodes.length),
+      states: statesForMeta,
+    };
+
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: "subscription",
       line_items: [
         {
           price_data: {
             currency: "usd",
             unit_amount: tierConfig.unitAmount,
+            recurring: { interval: "week" },
             product_data: {
               name: `IUL OTP Leads — ${tierConfig.label} Rate`,
               description: `${leadCount} phone-verified IUL leads (${packCount} pack${
                 packCount > 1 ? "s" : ""
-              } of ${LEADS_PER_PACK}) — Target states: ${statesLabel}`,
+              } of ${LEADS_PER_PACK}) — billed weekly — Target states: ${statesLabel}`,
             },
           },
           quantity: leadCount,
@@ -213,12 +264,11 @@ app.post("/api/create-checkout-session", async (req, res) => {
       ],
       success_url: `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cancel.html`,
-      metadata: {
-        tier,
-        packs: String(packCount),
-        leads: String(leadCount),
-        state_count: String(stateCodes.length),
-        states: statesForMeta,
+      metadata: orderMetadata,
+      // Also stamped on the Subscription object itself so renewal invoices
+      // (which don't carry Checkout Session metadata) can still read it.
+      subscription_data: {
+        metadata: orderMetadata,
       },
     });
 
